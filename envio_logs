@@ -1,0 +1,33 @@
+
+#!/bin/bash
+
+# ===============================
+# SCRIPT: ENVIO LOG POSTGRES
+# ===============================
+
+VER="1.0"
+
+set -euo pipefail
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+# === CONFIGURAÇÕES ===
+LOG_ORIGEM="/var/log/postgresql"
+DESTINO="usuario@192.168.1.50"
+DESTINO_DIR="/dados/logs_postgres"
+
+# Nome do log do dia (baseado no formato padrão postgresql-Mon.log)
+LOG_DIA="postgresql-$(date +%a).log"
+
+# Nome que ficará salvo no servidor destino
+DATA_ATUAL="$(date +%Y-%m-%d)"
+LOG_DESTINO="${DATA_ATUAL}.log"
+
+echo "[$(date)] Iniciando envio do log ${LOG_DIA}"
+
+# Envia via rsync e já renomeia no destino
+rsync -avz \
+  ${LOG_ORIGEM}/${LOG_DIA} \
+  ${DESTINO}:${DESTINO_DIR}/${LOG_DESTINO}
+
+echo "[$(date)] Envio concluído com sucesso"
