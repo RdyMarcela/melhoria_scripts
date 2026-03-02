@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# ===============================
+# SCRIPT: GERA RELATÓRIO PGBADGER
+# ===============================
+
+VER="1.0"
+
+set -euo pipefail
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
+
+# === CONFIGURAÇÕES ===
+LOG_DIR="/dados/logs_postgres"
+HTML_DIR="/var/www/pgbadger"
+
+DATA_ATUAL="$(date +%Y-%m-%d)"
+LOG_ATUAL="${LOG_DIR}/${DATA_ATUAL}.log"
+HTML_ATUAL="${HTML_DIR}/${DATA_ATUAL}.html"
+
+echo "[$(date)] Gerando relatório ${DATA_ATUAL}"
+
+if [ -f "${LOG_ATUAL}" ]; then
+
+  pgbadger -j 4 \
+    --quiet \
+    --outfile "${HTML_ATUAL}" \
+    "${LOG_ATUAL}"
+
+  echo "[$(date)] Relatório gerado com sucesso"
+
+else
+  echo "[$(date)] Log do dia não encontrado!"
+  exit 1
+fi
+
+# ===============================
+# ATUALIZA INDEX
+# ===============================
+
+echo "[$(date)] Atualizando index.html"
+
+cd ${HTML_DIR}
+
+echo "<h2>Relatórios pgBadger</h2><ul>" > index.html
+
+for file in *.html; do
+  echo "<li><a href=\"$file\">$file</a></li>" >> index.html
+done
+
+echo "</ul>" >> index.html
+
+echo "[$(date)] Processo finalizado"
